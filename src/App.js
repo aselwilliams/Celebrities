@@ -4,7 +4,6 @@
 // sorting based on name or popularity
 // sorting based on gender 
 
-
 import { useState, useEffect } from "react";
 import { Spinner, Button, Input } from "reactstrap";
 import Card from '@mui/material/Card';
@@ -102,7 +101,7 @@ function App() {
                 <div className="mb-5">
 
                     <Input onChange={handleChange}
-                        onKey={handleKeyDown}
+                        onKeyDown={handleKeyDown}
                     />
                 </div>
                 <div className="d-flex justify-content-between">
