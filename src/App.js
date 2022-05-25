@@ -1,8 +1,9 @@
-// pagination
+//pagingation
 // searching with debounce
 // modal
 // sorting based on name or popularity
 // sorting based on gender 
+
 
 import { useState, useEffect } from "react";
 import { Spinner, Button, Input } from "reactstrap";
@@ -11,21 +12,28 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
+import { FaArrowAltCircleDown } from 'react-icons/fa';
+import { FaArrowAltCircleUp } from 'react-icons/fa';
 import PaginationForMovieData from "./Pagination";
-import {FaArrowAltCircleDown,FaArrowAltCircleUp} from 'react-icons/fa';
-import ModalComp from './ModalComp';
-// import DebounceInput from 'debounce'
-
-
+import BasicModal from "./ModalComp"
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+// import { DebounceInput } from "debounce"
+// console.log(DebounceInput)
 function App() {
     const [data, setData] = useState([])
     const [search, setSearch] = useState("")
     const [page, setPage] = useState(1)
     const [dataLoaded, setDataLoaded] = useState(false)
     const [total_pages, setTotal] = useState(0)
-    const [sortByPopularity,setSortByPopularity]=useState('desc')
-    const [modalDataToBeShown,setModalData]=useState('')
-    const [openModal, setOpenModal]=useState(false)
+    const [sortByPopularity, setSortByPopularity] = useState("desc") //"asc"
+    const [modalDataToBeShown, setModalData] = useState("")
+    const [openModal, setOpenModal] = useState(false)
+    const [dropDown, setDropDown] = useState(0)
+
 
     const header = "https://image.tmdb.org/t/p/w185/"
 
@@ -42,68 +50,93 @@ function App() {
     const handleChange = (e) => {
         setSearch(e.target.value)
     }
-
-    // const filteredAfterSearch=()=>{
-    //     let filtered=data.filter(i=>i.name.toLowercase().includes(search.toLowerCase()))
-    //     return filtered;
-    // }
-
-    const sortData=()=>{
-        let sorted=data.sort((a,b)=>sortByPopularity==='desc' ? b.popularity-a.popularity : a.popularity-b.popularity)
-        return sorted;//[asc] [desc]
+    const sortData = (someDataAfterDropDwn) => {
+        let sorted = someDataAfterDropDwn.sort((a, b) => sortByPopularity === "desc" ? b.popularity - a.popularity : a.popularity - b.popularity)
+        return sorted
     }
 
-    const filteredAfterSearch = () => {
-        let filtered = sortData(data).filter(i => i.name.toLowerCase().includes(search.toLowerCase())) //"Venera" >> "venera"
-        return filtered //[{},{}]
+    const filterAfterSearch = () => {
+        let dropDownFiltered;
+        if (dropDown > 0) {
+            dropDownFiltered = data.filter(i => i.gender === dropDown)//[{}] [{}{}]
+        } else {
+            dropDownFiltered = data
+        }
+
+        // dropDownFiltered : [{}],[{}],[{},{}]
+
+        let filtered = sortData(dropDownFiltered).filter(i => i.name.toLowerCase().includes(search.toLowerCase()))
+        return filtered //[0-20]
     }
+
     const updatePage = (pageNumber) => {
         setPage(pageNumber)
         setDataLoaded(false)
         console.log(pageNumber)
     }
-
-    const handleSortingByPopularity=()=>{
-        if(sortByPopularity==='desc'){
-            setSortByPopularity('asc')
+    const handleSortingByPopularity = () => {
+        if (sortByPopularity === "desc") {
+            setSortByPopularity("asc")
         } else {
-            setSortByPopularity('desc')
+            setSortByPopularity("desc")
         }
     }
-const handleModal=(modalId)=>{
-    let modalData=data.filter(i=>i.id===modalId[0])
-    setModalData(modalData)
-    setOpenModal(true)
-}
-const handleClose=()=>{
-    setOpenModal(false)
-}
-    const handleKeyDown=()=>{
-
+    const handleKeyDown = () => {
+        console.log("stopped typing")
     }
-console.log(search)
+    const handleModal = (modalId) => {
+        let modalData = data.filter(i => i.id === modalId)[0]  //[{}]
+        setModalData(modalData)
+        setOpenModal(true)
+    }
+    const handleClose = () => {
+        setOpenModal(false)
+    }
+    const handleChangeDropDown = (e) => {
+        setDropDown(e.target.value)
+    }
+    console.log(dropDown)
     return (
         <div className="container">
             <div className="row mt-5">
                 <div className="mb-5">
-                    <Input onChange={handleChange} onKeyDown={handleKeyDown}
+
+                    <Input onChange={handleChange}
+                        onKey={handleKeyDown}
                     />
                 </div>
-                <div className='d-flex justify-content-between'>
-                <PaginationForMovieData total_pages={total_pages} updatePage={updatePage} page={page} />
-                <div onClick={handleSortingByPopularity}>
-                    <span className='me-3'><strong>Sort by Popularity</strong></span>
-                    {sortByPopularity==='desc' ?
-                    <FaArrowAltCircleDown size='28px'/> :
-                    <FaArrowAltCircleUp size='28px' />
-                }    
-                </div>
-        
+                <div className="d-flex justify-content-between">
+
+                    <PaginationForMovieData total_pages={total_pages} updatePage={updatePage} page={page} />
+                    <div>
+                        <FormControl fullWidth>
+                            <InputLabel id="demo-simple-select-label">Gender</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={dropDown}
+                                label="Age"
+                                onChange={handleChangeDropDown}
+                            >
+                                <MenuItem value={2}>Male</MenuItem>
+                                <MenuItem value={1}>Female</MenuItem>
+                                <MenuItem value={0}>All</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <div onClick={handleSortingByPopularity}>
+                        <span className="me-3">Sort by Popularity</span>
+                        {
+                            sortByPopularity === "desc" ?
+                                <FaArrowAltCircleDown size='40px' /> :
+                                <FaArrowAltCircleUp size='40px' />
+                        }
+                    </div>
                 </div>
                 {
                     !dataLoaded ? <Spinner>
                         Loading...
-                    </Spinner> : filteredAfterSearch().map(star => {
+                    </Spinner> : filterAfterSearch().map(star => { //[20] [20-0] >>[asc] [desc]
                         let knownFor = star.known_for.map(i => i.original_title || i.original_name) //star.known_for:[{original_title:},{original_title},{}]
                         return (
 
@@ -123,13 +156,13 @@ console.log(search)
                                     </Typography>
                                 </CardContent>
                                 <CardActions>
-                                    <Button size="small" onClick={()=>handleModal(star.id)}>show more..</Button>
+                                    <Button size="small" onClick={() => handleModal(star.id)}>show more..</Button>
                                 </CardActions>
                             </Card>
                         )
                     })
                 }
-                {modalDataToBeShown && <BasicModal handleClose={handleClose}/>}
+                {modalDataToBeShown && <BasicModal handleClose={handleClose} openModal={openModal} modalDataToBeShown={modalDataToBeShown} />}
             </div>
         </div>
     )
