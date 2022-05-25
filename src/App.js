@@ -12,7 +12,10 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import PaginationForMovieData from "./Pagination";
-import {FaArrowAltCircleDown,FaArrowAltCircleUp} from 'react-icons/fa'
+import {FaArrowAltCircleDown,FaArrowAltCircleUp} from 'react-icons/fa';
+import ModalComp from './ModalComp';
+// import DebounceInput from 'debounce'
+
 
 function App() {
     const [data, setData] = useState([])
@@ -21,6 +24,8 @@ function App() {
     const [dataLoaded, setDataLoaded] = useState(false)
     const [total_pages, setTotal] = useState(0)
     const [sortByPopularity,setSortByPopularity]=useState('desc')
+    const [modalDataToBeShown,setModalData]=useState('')
+    const [openModal, setOpenModal]=useState(false)
 
     const header = "https://image.tmdb.org/t/p/w185/"
 
@@ -36,16 +41,20 @@ function App() {
     }, [page])
     const handleChange = (e) => {
         setSearch(e.target.value)
-
     }
 
-    const sortByPop=(dataForSorting)=>{
-        let arr=dataForSorting.sort((a,b)=>sortByPopularity==='desc' ? b.popularity-a.popularity : a.popularity-b.popularity)
-        return arr;//[asc] [desc]
+    // const filteredAfterSearch=()=>{
+    //     let filtered=data.filter(i=>i.name.toLowercase().includes(search.toLowerCase()))
+    //     return filtered;
+    // }
+
+    const sortData=()=>{
+        let sorted=data.sort((a,b)=>sortByPopularity==='desc' ? b.popularity-a.popularity : a.popularity-b.popularity)
+        return sorted;//[asc] [desc]
     }
 
-    const filteredAfterSearch = (searchItem) => {
-        let filtered = sortByPop(data).filter(i => i.name.toLowerCase().includes(searchItem.toLowerCase())) //"Venera" >> "venera"
+    const filteredAfterSearch = () => {
+        let filtered = sortData(data).filter(i => i.name.toLowerCase().includes(search.toLowerCase())) //"Venera" >> "venera"
         return filtered //[{},{}]
     }
     const updatePage = (pageNumber) => {
@@ -61,12 +70,23 @@ function App() {
             setSortByPopularity('desc')
         }
     }
+const handleModal=(modalId)=>{
+    let modalData=data.filter(i=>i.id===modalId[0])
+    setModalData(modalData)
+    setOpenModal(true)
+}
+const handleClose=()=>{
+    setOpenModal(false)
+}
+    const handleKeyDown=()=>{
 
+    }
+console.log(search)
     return (
         <div className="container">
             <div className="row mt-5">
                 <div className="mb-5">
-                    <Input onChange={handleChange}
+                    <Input onChange={handleChange} onKeyDown={handleKeyDown}
                     />
                 </div>
                 <div className='d-flex justify-content-between'>
@@ -83,7 +103,7 @@ function App() {
                 {
                     !dataLoaded ? <Spinner>
                         Loading...
-                    </Spinner> : filteredAfterSearch(search).map(star => {
+                    </Spinner> : filteredAfterSearch().map(star => {
                         let knownFor = star.known_for.map(i => i.original_title || i.original_name) //star.known_for:[{original_title:},{original_title},{}]
                         return (
 
@@ -103,12 +123,13 @@ function App() {
                                     </Typography>
                                 </CardContent>
                                 <CardActions>
-                                    <Button size="small">show more..</Button>
+                                    <Button size="small" onClick={()=>handleModal(star.id)}>show more..</Button>
                                 </CardActions>
                             </Card>
                         )
                     })
                 }
+                {modalDataToBeShown && <BasicModal handleClose={handleClose}/>}
             </div>
         </div>
     )
