@@ -12,6 +12,7 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import PaginationForMovieData from "./Pagination";
+import {FaArrowAltCircleDown,FaArrowAltCircleUp} from 'react-icons/fa'
 
 function App() {
     const [data, setData] = useState([])
@@ -19,6 +20,7 @@ function App() {
     const [page, setPage] = useState(1)
     const [dataLoaded, setDataLoaded] = useState(false)
     const [total_pages, setTotal] = useState(0)
+    const [sortByPopularity,setSortByPopularity]=useState('desc')
 
     const header = "https://image.tmdb.org/t/p/w185/"
 
@@ -36,8 +38,14 @@ function App() {
         setSearch(e.target.value)
 
     }
+
+    const sortByPop=(dataForSorting)=>{
+        let arr=dataForSorting.sort((a,b)=>sortByPopularity==='desc' ? b.popularity-a.popularity : a.popularity-b.popularity)
+        return arr;//[asc] [desc]
+    }
+
     const filteredAfterSearch = (searchItem) => {
-        let filtered = data.filter(i => i.name.toLowerCase().includes(searchItem.toLowerCase())) //"Venera" >> "venera"
+        let filtered = sortByPop(data).filter(i => i.name.toLowerCase().includes(searchItem.toLowerCase())) //"Venera" >> "venera"
         return filtered //[{},{}]
     }
     const updatePage = (pageNumber) => {
@@ -45,6 +53,15 @@ function App() {
         setDataLoaded(false)
         console.log(pageNumber)
     }
+
+    const handleSortingByPopularity=()=>{
+        if(sortByPopularity==='desc'){
+            setSortByPopularity('asc')
+        } else {
+            setSortByPopularity('desc')
+        }
+    }
+
     return (
         <div className="container">
             <div className="row mt-5">
@@ -52,8 +69,17 @@ function App() {
                     <Input onChange={handleChange}
                     />
                 </div>
-
+                <div className='d-flex justify-content-between'>
                 <PaginationForMovieData total_pages={total_pages} updatePage={updatePage} page={page} />
+                <div onClick={handleSortingByPopularity}>
+                    <span className='me-3'><strong>Sort by Popularity</strong></span>
+                    {sortByPopularity==='desc' ?
+                    <FaArrowAltCircleDown size='28px'/> :
+                    <FaArrowAltCircleUp size='28px' />
+                }    
+                </div>
+        
+                </div>
                 {
                     !dataLoaded ? <Spinner>
                         Loading...
