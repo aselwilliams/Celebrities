@@ -123,7 +123,7 @@ function App() {
                             </Select>
                         </FormControl>
                     </div>
-                    <div onClick={handleSortingByPopularity}>
+                    <div onClick={handleSortingByPopularity} >
                         <span className="me-3">Sort by Popularity</span>
                         {
                             sortByPopularity === "desc" ?
